@@ -7,7 +7,7 @@ OBJS = main.o
 main.out: ${OBJS}
 	${COMP} $^ -o $@
 
-%.o: %.cpp *.h
+%.o: %.cpp
 	${COMP} -c $<
 
 .PHONY: clean
