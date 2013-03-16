@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Ran1.h"
 
 const int m1=259200, ia1=7141, ic1=54773;
@@ -16,7 +17,13 @@ Ran1::~Ran1(){
 
 void Ran1::setSeed(int seed){
 
-    ix1=(ic1-seed) % m1;
+    if(seed<0){
+        std::cout << "The chosen seed is smaller than 0" << std::endl;
+        std::cout << "The seed must be larger than 0" << std::endl;
+        std::cout << "The default seed (0) will be used" << std::endl;
+    }
+
+    ix1=(ic1+seed) % m1;
     ix1=(ia1*ix1+ic1) % m1;
     ix2=ix1 % m2;
     ix1=(ia1*ix1+ic1) % m1;
