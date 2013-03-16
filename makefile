@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 DBUG = -D DEBUGGING
 COMP = g++-4.6 ${DBUG} -std=c++0x -Wall
-OBJS = main.o
+OBJS = main.o Ran1.o
 
 main.out: ${OBJS}
 	${COMP} $^ -o $@
