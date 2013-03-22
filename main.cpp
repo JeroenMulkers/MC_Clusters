@@ -22,15 +22,17 @@ void initializeSet(set_particles &set, Ran1 &);
 
 int main (int argc, char* argv[]) {
 
-    Ran1 RG(5);
-
+    int seed = 5;
     int N = 20;
+    int nMC = 1000;
+    double temp = 0;
+
+    Ran1 RG(seed);
+
     set_particles set(N);
     initializeSet(set, RG);
 
     double energy = Energy(set);
-
-    int nMC = 1000;
 
     for(int iMC=0; iMC<nMC; iMC++){
 
@@ -43,8 +45,9 @@ int main (int argc, char* argv[]) {
             p.y += p.step*(2*RG.getNumber()-1);
 
             double newEnergy = Energy(set);
+            double Ediff = newEnergy - energy;
 
-            if( newEnergy < energy ){
+            if( Ediff < 0 || exp(-Ediff/temp) > RG.getNumber() ){
                 energy = newEnergy;
             } else {
                 p.x = x_backup;
