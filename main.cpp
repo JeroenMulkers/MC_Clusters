@@ -1,7 +1,8 @@
 #include <iostream>
+#include <fstream>
 #include "Ran1.h"
 #include <cmath>
-#include<algorithm>
+#include <algorithm>
 #include <vector>
 #include <tuple>
 
@@ -22,10 +23,28 @@ void initializeSet(set_particles &set, Ran1 &);
 
 int main (int argc, char* argv[]) {
 
+    // default values
+
     int seed = 5;
     int N = 20;
     int nMC = 1000;
     double temp = 0;
+
+    // read "input.dat"
+
+    std::ifstream input("input.dat");
+    std::string str;
+    std::string trash;
+
+    while ( !input.eof() )
+    {
+        input >> str;
+        if      ( str == "seed"  ) { input >> seed  ;}
+        else if ( str == "N"     ) { input >> N     ;}
+        else if ( str == "nMC"   ) { input >> nMC   ;}
+        else if ( str == "temp"  ) { input >> temp  ;}
+        else                       { input >> trash ;}
+    }
 
     Ran1 RG(seed);
 
