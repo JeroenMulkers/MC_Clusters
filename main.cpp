@@ -6,7 +6,7 @@
 #include <vector>
 #include <tuple>
 
-const double PI = 3.1415;
+const double PI = 3.14159265359;
 
 struct particle{
     double x;
@@ -17,6 +17,7 @@ struct particle{
 typedef std::vector< particle > set_particles;
 
 double Energy(set_particles);
+
 void initializeSet(set_particles &set, Ran1 &);
 
 /********************************************************/
@@ -30,20 +31,21 @@ int main (int argc, char* argv[]) {
     int nMC = 1000;
     double temp = 0;
 
-    // read "input.dat"
+    // read "input file"
 
-    std::ifstream input("input.dat");
-    std::string str;
-    std::string trash;
-
-    while ( !input.eof() )
-    {
-        input >> str;
-        if      ( str == "seed"  ) { input >> seed  ;}
-        else if ( str == "N"     ) { input >> N     ;}
-        else if ( str == "nMC"   ) { input >> nMC   ;}
-        else if ( str == "temp"  ) { input >> temp  ;}
-        else                       { input >> trash ;}
+    if( argc == 2 ){
+        std::ifstream input(argv[1]);
+        std::string str;
+        std::string trash;
+        while ( !input.eof() )
+        {
+            input >> str;
+            if      ( str == "seed"  ) { input >> seed  ;}
+            else if ( str == "N"     ) { input >> N     ;}
+            else if ( str == "nMC"   ) { input >> nMC   ;}
+            else if ( str == "temp"  ) { input >> temp  ;}
+            else                       { input >> trash ;}
+        }
     }
 
     Ran1 RG(seed);
