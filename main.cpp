@@ -30,6 +30,10 @@ int main (int argc, char* argv[]) {
     int N = 20;
     int nMC = 1000;
     double temp = 0;
+    double step = 0.2;
+    double max_step = 1;
+    double min_step = 0.1;
+    double factor = 1.2;
 
     // read "input file"
 
@@ -40,10 +44,13 @@ int main (int argc, char* argv[]) {
         while ( !input.eof() )
         {
             input >> str;
-            if      ( str == "seed"  ) { input >> seed  ;}
-            else if ( str == "N"     ) { input >> N     ;}
-            else if ( str == "nMC"   ) { input >> nMC   ;}
-            else if ( str == "temp"  ) { input >> temp  ;}
+            if      ( str == "seed"      ) { input >> seed    ;}
+            else if ( str == "N"         ) { input >> N       ;}
+            else if ( str == "nMC"       ) { input >> nMC     ;}
+            else if ( str == "temp"      ) { input >> temp    ;}
+            else if ( str == "step"      ) { input >> step    ;}
+            else if ( str == "max_step"  ) { input >> max_step;}
+            else if ( str == "min_step"  ) { input >> min_step;}
             else                       { input >> trash ;}
         }
     }
@@ -70,10 +77,11 @@ int main (int argc, char* argv[]) {
 
             if( Ediff < 0 || exp(-Ediff/temp) > RG.getNumber() ){
                 energy = newEnergy;
+                p.step = std::min(p.step*factor,max_step);
             } else {
                 p.x = x_backup;
                 p.y = y_backup;
-                p.step = std::max(p.step/1.2,0.1);
+                p.step = std::max(p.step/factor,min_step);
             }
         }
     }
@@ -87,7 +95,7 @@ int main (int argc, char* argv[]) {
 
 /********************************************************/
 
-void initializeSet(set_particles & set, Ran1 & RG){
+void initializeSet(set_particles & set, Ran1 & RG, double step){
     int i = 0;
     for( auto & p : set){
 
@@ -96,7 +104,7 @@ void initializeSet(set_particles & set, Ran1 & RG){
 
         p.x = a*cos(2*PI*rndm);
         p.y = a*sin(2*PI*rndm);
-        p.step = 0.2;
+        p.step = step;
 
     }
 }
