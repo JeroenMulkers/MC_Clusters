@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 DBUG = -D DEBUGGING
-COMP = g++-4.6 ${DBUG} -std=c++0x -Wall
+COMP = g++-4.7 ${DBUG} -std=c++11 -Wall
 OBJS = main.o Ran1.o testRandGen.o
 
 testRandGen.out: testRandGen.o Ran1.o
