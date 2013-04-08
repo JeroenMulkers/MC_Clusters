@@ -20,21 +20,19 @@ double Energy(set_particles);
 
 void initializeSet(set_particles &set, Ran1 &, double step);
 
-/********************************************************/
-
 int main (int argc, char* argv[]) {
 
 
     // default values
-    int seed = 5;
-    int N = 20;
-    int nMC = 1000;
-    int ntest = 1;
-    double temp = 0;
-    double step = 0.2;
-    double max_step = 1;
+    int    seed     = 5;
+    int    N        = 20;
+    int    nMC      = 1000;
+    int    ntest    = 1;
+    double temp     = 0.;
+    double step     = 0.2;
+    double max_step = 1.;
     double min_step = 0.1;
-    double factor = 1.2;
+    double factor   = 1.2;
 
 
     // read "input file"
@@ -45,56 +43,58 @@ int main (int argc, char* argv[]) {
         while ( !input.eof() )
         {
             input >> str;
-            if      ( str == "seed"      ) { input >> seed    ;}
-            else if ( str == "N"         ) { input >> N       ;}
-            else if ( str == "nMC"       ) { input >> nMC     ;}
-            else if ( str == "temp"      ) { input >> temp    ;}
-            else if ( str == "step"      ) { input >> step    ;}
-            else if ( str == "max_step"  ) { input >> max_step;}
-            else if ( str == "min_step"  ) { input >> min_step;}
-            else if ( str == "ntest"     ) { input >> ntest   ;}
-            else if ( str == "factor"    ) { input >> factor  ;}
-            else                       { input >> trash ;}
+            if      ( str == "seed"     ) { input >> seed    ;}
+            else if ( str == "N"        ) { input >> N       ;}
+            else if ( str == "nMC"      ) { input >> nMC     ;}
+            else if ( str == "temp"     ) { input >> temp    ;}
+            else if ( str == "step"     ) { input >> step    ;}
+            else if ( str == "max_step" ) { input >> max_step;}
+            else if ( str == "min_step" ) { input >> min_step;}
+            else if ( str == "ntest"    ) { input >> ntest   ;}
+            else if ( str == "factor"   ) { input >> factor  ;}
+            else                          { input >> trash ;}
         }
     }
 
 
-
-    // Create Ran1 object
+    // Create random generator
     Ran1 RG(seed);
-
-
-    // Declaration of a set of particles
-    set_particles set(N);
 
 
     // Start tests
     for(int test=0; test<ntest; test++){
 
+
+        // Initialize the positions and calculate the initial energy
+        set_particles set(N);
         initializeSet(set, RG, step);
         double energy = Energy(set);
 
         // Monte Carlo
         for(int iMC=0; iMC<nMC; iMC++){
 
-            for(auto & p : set){
+            // Loop over all the particles
+            for(auto & particle : set){
 
-                double x_backup = p.x;
-                double y_backup = p.y;
+                // Back up the current positions and energy
+                double x_backup = particle.x;
+                double y_backup = particle.y;
+                double energy_backup = energy;
 
-                p.x += p.step*(2*RG.getNumber()-1);
-                p.y += p.step*(2*RG.getNumber()-1);
+                // Modify the position and caculate the energy and energy diff
+                particle.x += particle.step * (2*RG.getNumber()-1);
+                particle.y += particle.step * (2*RG.getNumber()-1);
+                energy = Energy(set);
+                double Ediff = energy - energy_backup;
 
-                double newEnergy = Energy(set);
-                double Ediff = newEnergy - energy;
-
+                // Check if the new position is 'good' (energydiff low enough)
                 if( Ediff < 0 || exp(-Ediff/temp) > RG.getNumber() ){
-                    energy = newEnergy;
-                    p.step = std::min(p.step*factor,max_step);
+                    particle.step = std::min( particle.step*factor , max_step );
                 } else {
-                    p.x = x_backup;
-                    p.y = y_backup;
-                    p.step = std::max(p.step/factor,min_step);
+                    energy = energy_backup;
+                    particle.x = x_backup;
+                    particle.y = y_backup;
+                    particle.step = std::max( particle.step/factor , min_step );
                 }
             }
         }
@@ -102,7 +102,6 @@ int main (int argc, char* argv[]) {
 
         // Prints the energy to the console
         std::cout << test << " final energy " << energy/N << std::endl;
-
 
         // Write coordinates to a file
         char filename[100];
@@ -117,18 +116,19 @@ int main (int argc, char* argv[]) {
     return 0;
 }
 
-/********************************************************/
 
 void initializeSet(set_particles & set, Ran1 & RG, double step){
     int i = 0;
-    for( auto & p : set){
+
+    // loop over every particle in the set
+    for( auto & particle : set){
 
         double a = sqrt(0.25*(++i)*RG.getNumber());
         double rndm = RG.getNumber();
 
-        p.x = a*cos(2*PI*rndm);
-        p.y = a*sin(2*PI*rndm);
-        p.step = step;
+        particle.x = a*cos(2*PI*rndm);
+        particle.y = a*sin(2*PI*rndm);
+        particle.step = step;
 
     }
 }
