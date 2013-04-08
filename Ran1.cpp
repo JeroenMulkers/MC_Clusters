@@ -38,17 +38,22 @@ void Ran1::setSeed(int seed){
 
 double Ran1::getNumber(){
 
-    ix1=(ia1*ix1+ic1) % m1;
-    ix2=(ia2*ix2+ic2) % m2;
-    ix3=(ia3*ix3+ic3) % m3;
-
-    int j=(97*ix3)/m3;
-
+    bool found = false;
     double random=0;
 
-    if(j<97||j>=0){
-        random=R[j];
-        R[j]=(ix1+ix2*rm2)*rm1;
+    while(!found){
+        ix1=(ia1*ix1+ic1) % m1;
+        ix2=(ia2*ix2+ic2) % m2;
+        ix3=(ia3*ix3+ic3) % m3;
+
+        int j=(97*ix3)/m3;
+
+        if(j<97||j>=0){
+            random=R[j];
+            R[j]=(ix1+ix2*rm2)*rm1;
+        }
+
+        if (random > 0 && random < 1 ) found = true;
     }
 
     return random;

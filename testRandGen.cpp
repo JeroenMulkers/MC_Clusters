@@ -17,12 +17,14 @@ int findPeriod(std::vector<double>);
 int main (int argc, char* argv[]) {
 
     Ran1 RG(5);
-    int N = 100000000;
+    int N = 100;
 
     std::vector<double> list;
 
     for(int i=0; i<N; i++){
-         list.push_back(RG.getNumber());
+        double number = RG.getNumber();
+        std::cout << number << std::endl;
+        list.push_back(number);
     }
 
     std::cout << findPeriod(list) << std::endl;
