@@ -18,25 +18,26 @@ typedef std::vector< particle > set_particles;
 
 double Energy(set_particles);
 
-void initializeSet(set_particles &set, Ran1 &);
+void initializeSet(set_particles &set, Ran1 &, double step);
 
 /********************************************************/
 
 int main (int argc, char* argv[]) {
 
-    // default values
 
+    // default values
     int seed = 5;
     int N = 20;
     int nMC = 1000;
+    int ntest = 1;
     double temp = 0;
     double step = 0.2;
     double max_step = 1;
     double min_step = 0.1;
     double factor = 1.2;
 
-    // read "input file"
 
+    // read "input file"
     if( argc == 2 ){
         std::ifstream input(argv[1]);
         std::string str;
@@ -51,43 +52,66 @@ int main (int argc, char* argv[]) {
             else if ( str == "step"      ) { input >> step    ;}
             else if ( str == "max_step"  ) { input >> max_step;}
             else if ( str == "min_step"  ) { input >> min_step;}
+            else if ( str == "ntest"     ) { input >> ntest   ;}
+            else if ( str == "factor"    ) { input >> factor  ;}
             else                       { input >> trash ;}
         }
     }
 
+
+
+    // Create Ran1 object
     Ran1 RG(seed);
 
+
+    // Declaration of a set of particles
     set_particles set(N);
-    initializeSet(set, RG);
 
-    double energy = Energy(set);
 
-    for(int iMC=0; iMC<nMC; iMC++){
+    // Start tests
+    for(int test=0; test<ntest; test++){
 
-        for(auto & p : set){
+        initializeSet(set, RG, step);
+        double energy = Energy(set);
 
-            double x_backup = p.x;
-            double y_backup = p.y;
+        // Monte Carlo
+        for(int iMC=0; iMC<nMC; iMC++){
 
-            p.x += p.step*(2*RG.getNumber()-1);
-            p.y += p.step*(2*RG.getNumber()-1);
+            for(auto & p : set){
 
-            double newEnergy = Energy(set);
-            double Ediff = newEnergy - energy;
+                double x_backup = p.x;
+                double y_backup = p.y;
 
-            if( Ediff < 0 || exp(-Ediff/temp) > RG.getNumber() ){
-                energy = newEnergy;
-                p.step = std::min(p.step*factor,max_step);
-            } else {
-                p.x = x_backup;
-                p.y = y_backup;
-                p.step = std::max(p.step/factor,min_step);
+                p.x += p.step*(2*RG.getNumber()-1);
+                p.y += p.step*(2*RG.getNumber()-1);
+
+                double newEnergy = Energy(set);
+                double Ediff = newEnergy - energy;
+
+                if( Ediff < 0 || exp(-Ediff/temp) > RG.getNumber() ){
+                    energy = newEnergy;
+                    p.step = std::min(p.step*factor,max_step);
+                } else {
+                    p.x = x_backup;
+                    p.y = y_backup;
+                    p.step = std::max(p.step/factor,min_step);
+                }
             }
         }
-    }
 
-    for( auto p : set ){
-        std::cout << p.x << "\t" << p.y << std::endl;
+
+        // Prints the energy to the console
+        std::cout << test << " final energy " << energy/N << std::endl;
+
+
+        // Write coordinates to a file
+        char filename[100];
+        sprintf(filename, "coo_%d.dat", test);
+        std::ofstream output(filename);
+        for( auto p : set )
+            output << p.x << "\t" << p.y << std::endl;
+        output.close();
+
     }
 
     return 0;
