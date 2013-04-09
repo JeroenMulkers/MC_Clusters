@@ -16,7 +16,7 @@ struct Particle{
 
 typedef std::vector< Particle > Set_particles;
 
-double Energy(Set_particles);
+double Energy(Set_particles set, double yukawa);
 
 void initializeSet(Set_particles &set, Ran1 &, double step);
 
@@ -33,6 +33,7 @@ int main (int argc, char* argv[]) {
     double max_step = 1.;
     double min_step = 0.1;
     double factor   = 1.2;
+    double yukawa   = 0;
 
 
     // read "input file"
@@ -52,7 +53,8 @@ int main (int argc, char* argv[]) {
             else if ( str == "min_step" ) { input >> min_step;}
             else if ( str == "ntest"    ) { input >> ntest   ;}
             else if ( str == "factor"   ) { input >> factor  ;}
-            else                          { input >> trash ;}
+            else if ( str == "yukawa"   ) { input >> yukawa  ;}
+            else                          { input >> trash   ;}
         }
     }
 
@@ -68,7 +70,7 @@ int main (int argc, char* argv[]) {
         // Initialize the positions and calculate the initial energy
         Set_particles set(N);
         initializeSet(set, RG, step);
-        double energy = Energy(set);
+        double energy = Energy(set,yukawa);
 
         // Monte Carlo
         for(int iMC=0; iMC<nMC; iMC++){
@@ -84,7 +86,7 @@ int main (int argc, char* argv[]) {
                 // Modify the position and caculate the energy and energy diff
                 particle.x += particle.step * (2*RG.getNumber()-1);
                 particle.y += particle.step * (2*RG.getNumber()-1);
-                energy = Energy(set);
+                energy = Energy(set,yukawa);
                 double Ediff = energy - energy_backup;
 
                 // Check if the new position is 'good' (energydiff low enough)
@@ -133,7 +135,7 @@ void initializeSet(Set_particles & set, Ran1 & RG, double step){
     }
 }
 
-double Energy(Set_particles set){
+double Energy(Set_particles set, double yukawa){
     //Calculates the energy of a given configuration
 
     double energy = 0;
@@ -146,9 +148,11 @@ double Energy(Set_particles set){
 
         for(auto it2 = it1+1; it2 != set.end(); it2++){
             Particle p2 = *it2;
-            energy += pow( pow(p1.x-p2.x,2) + pow(p1.y-p2.y,2) , -0.5);
+            double r = pow( pow(p1.x-p2.x,2) + pow(p1.y-p2.y,2) , 0.5);
+            energy += exp(-yukawa*r)/r;
         }
     }
 
     return energy;
 }
+
