@@ -10,7 +10,7 @@ main.out: main.o Ran1.o
 testRandGen.out: testRandGen.o Ran1.o
 	${COMP} $^ -o $@
 
-%.o: %.cpp
+%.o: %.cpp *.h
 	${COMP} -c $<
 
 .PHONY: clean

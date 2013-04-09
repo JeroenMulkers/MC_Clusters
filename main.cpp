@@ -1,24 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include "Ran1.h"
 #include <cmath>
 #include <algorithm>
 #include <vector>
 #include <tuple>
 
-const double PI = 3.14159265359;
+#include "Ran1.h"
+#include "Particles.h"
 
-struct Particle{
-    double x;
-    double y;
-    double step;
-};
-
-typedef std::vector< Particle > Set_particles;
-
-double Energy(Set_particles set, double yukawa);
-
-void initializeSet(Set_particles &set, Ran1 &, double step);
 
 int main (int argc, char* argv[]) {
 
@@ -106,53 +95,13 @@ int main (int argc, char* argv[]) {
         std::cout << test << " final energy " << energy/N << std::endl;
 
         // Write coordinates to a file
-        char filename[100];
+        char filename[20];
         sprintf(filename, "coo_%d.dat", test);
-        std::ofstream output(filename);
-        for( auto p : set )
-            output << p.x << "\t" << p.y << std::endl;
-        output.close();
+        PrintCoordinates(set,filename);
 
     }
 
     return 0;
 }
 
-
-void initializeSet(Set_particles & set, Ran1 & RG, double step){
-    int i = 0;
-
-    // loop over every particle in the set
-    for( auto & particle : set){
-
-        double a = sqrt(0.25*(++i)*RG.getNumber());
-        double rndm = RG.getNumber();
-
-        particle.x = a*cos(2*PI*rndm);
-        particle.y = a*sin(2*PI*rndm);
-        particle.step = step;
-
-    }
-}
-
-double Energy(Set_particles set, double yukawa){
-    //Calculates the energy of a given configuration
-
-    double energy = 0;
-
-    for(auto it1 = set.begin(); it1 != set.end(); it1++){
-
-        Particle p1 = *it1;
-        energy += pow(p1.x,2);
-        energy += pow(p1.y,2);
-
-        for(auto it2 = it1+1; it2 != set.end(); it2++){
-            Particle p2 = *it2;
-            double r = pow( pow(p1.x-p2.x,2) + pow(p1.y-p2.y,2) , 0.5);
-            energy += exp(-yukawa*r)/r;
-        }
-    }
-
-    return energy;
-}
 
