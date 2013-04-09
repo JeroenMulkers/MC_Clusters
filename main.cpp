@@ -8,17 +8,17 @@
 
 const double PI = 3.14159265359;
 
-struct particle{
+struct Particle{
     double x;
     double y;
     double step;
 };
 
-typedef std::vector< particle > set_particles;
+typedef std::vector< Particle > Set_particles;
 
-double Energy(set_particles);
+double Energy(Set_particles);
 
-void initializeSet(set_particles &set, Ran1 &, double step);
+void initializeSet(Set_particles &set, Ran1 &, double step);
 
 int main (int argc, char* argv[]) {
 
@@ -66,7 +66,7 @@ int main (int argc, char* argv[]) {
 
 
         // Initialize the positions and calculate the initial energy
-        set_particles set(N);
+        Set_particles set(N);
         initializeSet(set, RG, step);
         double energy = Energy(set);
 
@@ -117,7 +117,7 @@ int main (int argc, char* argv[]) {
 }
 
 
-void initializeSet(set_particles & set, Ran1 & RG, double step){
+void initializeSet(Set_particles & set, Ran1 & RG, double step){
     int i = 0;
 
     // loop over every particle in the set
@@ -133,19 +133,19 @@ void initializeSet(set_particles & set, Ran1 & RG, double step){
     }
 }
 
-double Energy(set_particles set){
+double Energy(Set_particles set){
     //Calculates the energy of a given configuration
 
     double energy = 0;
 
     for(auto it1 = set.begin(); it1 != set.end(); it1++){
 
-        particle p1 = *it1;
+        Particle p1 = *it1;
         energy += pow(p1.x,2);
         energy += pow(p1.y,2);
 
         for(auto it2 = it1+1; it2 != set.end(); it2++){
-            particle p2 = *it2;
+            Particle p2 = *it2;
             energy += pow( pow(p1.x-p2.x,2) + pow(p1.y-p2.y,2) , -0.5);
         }
     }
