@@ -45,10 +45,10 @@ double Energy(Set_particles set, double yukawa){
     return energy;
 }
 
-void PrintCoordinates(Set_particles set, std::string filename){
-        std::ofstream output(filename);
-        for( auto p : set )
-            output << p.x << "\t" << p.y << std::endl;
-        output.close();
-
+void PrintCoordinates(Set_particles set, std::ostream & output){
+    output << std::setiosflags(std::ios::left);
+    for( auto p : set ){
+        output << std::setw(16) << p.x << std::setw(16) << p.y;
+        output << std::setw(16) << pow( pow(p.x,2) + pow(p.y,2) , 0.5) << std::endl;
+    }
 }

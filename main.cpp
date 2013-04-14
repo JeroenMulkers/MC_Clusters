@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <tuple>
+#include <iomanip>
 
 #include "Ran1.h"
 #include "Particles.h"
@@ -92,12 +93,19 @@ int main (int argc, char* argv[]) {
 
 
         // Prints the energy to the console
-        std::cout << test << " final energy " << energy/N << std::endl;
+        std::cout << "test " << test << " final energy " << energy/N << std::endl;
 
-        // Write coordinates to a file
+        // Write results of the test to a file
         char filename[20];
         sprintf(filename, "coo_%d.dat", test);
-        PrintCoordinates(set,filename);
+        std::ofstream output(filename);
+        output << "# Test " << test << std::endl;
+        output << "# Number of particles " << N << std::endl;
+        output << "# Energy per particle " << energy/N << std::endl;
+        output << "#==============================" << std::endl;
+        output << "# x\ty\tr" << std::endl;
+        PrintCoordinates(set,output);
+        output.close();
 
     }
 
