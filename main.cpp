@@ -3,7 +3,6 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
-#include <tuple>
 #include <iomanip>
 
 #include "Ran1.h"
@@ -13,17 +12,23 @@
 int main (int argc, char* argv[]) {
 
 
+    // Remove old data files
+    system("rm *.energy *.coo");
+
+
     // default values
     int    seed     = 5;
     int    N        = 20;
     int    nMC      = 1000;
     int    ntest    = 1;
+    bool   verbose  = 0;
     double temp     = 0.;
     double step     = 0.2;
     double max_step = 1.;
     double min_step = 0.1;
     double factor   = 1.2;
     double yukawa   = 0;
+    std::string ini_coo = "random";
 
 
     // read "input file"
@@ -31,8 +36,7 @@ int main (int argc, char* argv[]) {
         std::ifstream input(argv[1]);
         std::string str;
         std::string trash;
-        while ( !input.eof() )
-        {
+        while ( !input.eof() ){
             input >> str;
             if      ( str == "seed"     ) { input >> seed    ;}
             else if ( str == "N"        ) { input >> N       ;}
@@ -44,13 +48,20 @@ int main (int argc, char* argv[]) {
             else if ( str == "ntest"    ) { input >> ntest   ;}
             else if ( str == "factor"   ) { input >> factor  ;}
             else if ( str == "yukawa"   ) { input >> yukawa  ;}
+            else if ( str == "ini_coo"  ) { input >> ini_coo ;}
+            else if ( str == "verbose"  ) { input >> verbose ;}
             else                          { input >> trash   ;}
         }
+        input.close();
     }
 
 
     // Create random generator
     Ran1 RG(seed);
+
+
+    // Vector to put the results in from the different tests
+    std::vector<double> energies;
 
 
     // Start tests
@@ -59,8 +70,10 @@ int main (int argc, char* argv[]) {
 
         // Initialize the positions and calculate the initial energy
         Set_particles set(N);
-        initializeSet(set, RG, step);
+        initializeSet(set, RG, step, ini_coo);
         double energy = Energy(set,yukawa);
+        if(verbose){ PrintCoordinates(set, energy, test, 0, 'i'); }
+
 
         // Monte Carlo
         for(int iMC=0; iMC<nMC; iMC++){
@@ -89,27 +102,74 @@ int main (int argc, char* argv[]) {
                     particle.step = std::max( particle.step/factor , min_step );
                 }
             }
+
+
+            // Print the temporary result to a file
+            if( verbose ){
+                char filename[25];
+                sprintf(filename, "test_%d.energy",test);
+                std::ofstream output_energy(filename,std::ofstream::app);
+                PrintCoordinates(set, energy, test, iMC, 's');
+                output_energy << energy << std::endl;
+                output_energy.close();
+            }
+
         }
 
 
-        // Prints the energy to the console
-        std::cout << "test " << test << " final energy " << energy/N << std::endl;
+        // Save the resulting energy of current test
+        energies.push_back(energy);
 
-        // Write results of the test to a file
-        char filename[20];
-        sprintf(filename, "coo_%d.dat", test);
-        std::ofstream output(filename);
-        output << "# Test " << test << std::endl;
-        output << "# Number of particles " << N << std::endl;
-        output << "# Energy per particle " << energy/N << std::endl;
-        output << "#==============================" << std::endl;
-        output << "# x\ty\tr" << std::endl;
-        PrintCoordinates(set,output);
-        output.close();
 
+        // Print the final result
+        PrintCoordinates(set, energy, test, nMC, 'f');
     }
+
+
+    // Find lowest energy
+    double lowest_energy = energies[0];
+    int    lowest_test = 0;
+    char   lowest_coo[25];
+    for(int i=0; i<ntest; i++){
+        if (energies[i] < lowest_energy){
+            lowest_test = i;
+        }
+    }
+    lowest_energy = energies[lowest_test];
+    sprintf(lowest_coo,"test_%d_final.coo",lowest_test);
+
+
+    // Print output
+    std::cout << std::endl << std::endl;
+    std::cout << "=INPUT=PARAMETERS===========================";
+    std::cout << std::endl << std::endl;
+    std::cout << "  input file          " << argv[1]  << std::endl;
+    std::cout << "  seed                " << seed     << std::endl;
+    std::cout << "  number of particles " << N        << std::endl;
+    std::cout << "  number of MC steps  " << nMC      << std::endl;
+    std::cout << "  temperature         " << temp     << std::endl;
+    std::cout << "  step                " << step     << std::endl;
+    std::cout << "  max_step            " << max_step << std::endl;
+    std::cout << "  min_step            " << min_step << std::endl;
+    std::cout << "  factor              " << factor   << std::endl;
+    std::cout << "  number of tests     " << ntest    << std::endl;
+    std::cout << "  yukawa constant     " << yukawa   << std::endl;
+    std::cout << "  initial coordinates " << ini_coo  << std::endl;
+    std::cout << "  verbose             " << verbose  << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "=GROUND=STATE===============================";
+    std::cout << std::endl << std::endl;
+    std::cout << "  test                " << lowest_test   << std::endl;
+    std::cout << "  energy/N            " << lowest_energy << std::endl;
+    std::cout << "  coordinates         " << lowest_coo    <<std::endl << std::endl;
+
+    std::cout << "=ENERGIES/N=================================";
+    std::cout << std::endl << std::endl;
+    for ( auto e : energies ) { std::cout << "  " << e << std::endl;}
 
     return 0;
 }
+
 
 
