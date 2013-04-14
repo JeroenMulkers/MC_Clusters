@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <iomanip>
+#include "omp.h"
 
 #include "Ran1.h"
 #include "Particles.h"
@@ -13,7 +14,7 @@ int main (int argc, char* argv[]) {
 
 
     // Remove old data files
-    system("rm *.energy *.coo");
+    system("rm -f *.energy test_*.coo");
 
 
     // default values
@@ -64,13 +65,13 @@ int main (int argc, char* argv[]) {
     std::vector<double> energies;
 
 
-    // Start tests
+    // begin tests
     for(int test=0; test<ntest; test++){
 
 
         // Initialize the positions and calculate the initial energy
         Set_particles set(N);
-        initializeSet(set, RG, step, ini_coo);
+        initializeSet( set, RG, step, ini_coo);
         double energy = Energy(set,yukawa);
         if(verbose){ PrintCoordinates(set, energy, test, 0, 'i'); }
 
@@ -110,7 +111,7 @@ int main (int argc, char* argv[]) {
                 sprintf(filename, "test_%d.energy",test);
                 std::ofstream output_energy(filename,std::ofstream::app);
                 PrintCoordinates(set, energy, test, iMC, 's');
-                output_energy << energy << std::endl;
+                output_energy << energy/N << std::endl;
                 output_energy.close();
             }
 
@@ -118,7 +119,7 @@ int main (int argc, char* argv[]) {
 
 
         // Save the resulting energy of current test
-        energies.push_back(energy);
+        energies.push_back(energy/N);
 
 
         // Print the final result
@@ -133,9 +134,9 @@ int main (int argc, char* argv[]) {
     for(int i=0; i<ntest; i++){
         if (energies[i] < lowest_energy){
             lowest_test = i;
+            lowest_energy = energies[i];
         }
     }
-    lowest_energy = energies[lowest_test];
     sprintf(lowest_coo,"test_%d_final.coo",lowest_test);
 
 
@@ -160,9 +161,12 @@ int main (int argc, char* argv[]) {
 
     std::cout << "=GROUND=STATE===============================";
     std::cout << std::endl << std::endl;
-    std::cout << "  test                " << lowest_test   << std::endl;
-    std::cout << "  energy/N            " << lowest_energy << std::endl;
-    std::cout << "  coordinates         " << lowest_coo    <<std::endl << std::endl;
+    std::cout << "  test                " << std::endl;
+    std::cout << "    " << lowest_test    << std::endl << std::endl;
+    std::cout << "  energy/N            " << std::endl;
+    std::cout << "    " << lowest_energy  << std::endl << std::endl;
+    std::cout << "  coordinates         " << std::endl;
+    std::cout << "    " << lowest_coo     << std::endl << std::endl;
 
     std::cout << "=ENERGIES/N=================================";
     std::cout << std::endl << std::endl;

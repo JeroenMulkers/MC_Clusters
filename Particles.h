@@ -61,30 +61,13 @@ void initializeSet(Set_particles & set, Ran1 & RG, double step, std::string ini_
                 sscanf(line.c_str(),"%lf%lf%lf",&x,&y,&r);
                 set[i].x = x;
                 set[i].y = y;
+                set[i].step = step;
                 i++;
             }
         }
         input_file.close();
 
     }
-}
-
-
-void ReadCooFile(Set_particles & set, std::string filename){
-    std::ifstream input_file(filename);
-    std::string line;
-    int i=0;
-    while (std::getline(input_file, line)) {
-        if (line[0] != '#' )
-        {
-            double x,y,r;
-            sscanf(line.c_str(),"%lf%lf%lf",&x,&y,&r);
-            set[i].x = x;
-            set[i].y = y;
-            i++;
-        }
-    }
-    input_file.close();
 }
 
 

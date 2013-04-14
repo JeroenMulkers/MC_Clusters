@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 DBUG = -D DEBUGGING
-COMP = g++-4.7 ${DBUG} -std=c++11 -Wall
+COMP = g++-4.7 ${DBUG} -std=c++11 -Wall -fopenmp
 OBJS = main.o Ran1.o testRandGen.o
 
 
