@@ -65,6 +65,11 @@ int main (int argc, char* argv[]) {
     std::vector<double> energies;
 
 
+		// Number of Metropolis successes and failures
+		int ps = 0;
+		int pf = 0;
+
+
     // begin tests
     for(int test=0; test<ntest; test++){
 
@@ -96,11 +101,13 @@ int main (int argc, char* argv[]) {
                 // Check if the new position is 'good' (energydiff low enough)
                 if( Ediff < 0 || exp(-Ediff/temp) > RG.getNumber() ){
                     particle.step = std::min( particle.step*factor , max_step );
+										ps++;
                 } else {
                     energy = energy_backup;
                     particle.x = x_backup;
                     particle.y = y_backup;
                     particle.step = std::max( particle.step/factor , min_step );
+										pf++;
                 }
             }
 
@@ -110,9 +117,9 @@ int main (int argc, char* argv[]) {
                 char filename[25];
                 sprintf(filename, "test_%d.energy",test);
                 std::ofstream output_energy(filename,std::ofstream::app);
-                PrintCoordinates(set, energy, test, iMC, 's');
-                output_energy << energy/N << std::endl;
+                output_energy << std::setprecision(9) << energy/N << std::endl;
                 output_energy.close();
+                PrintCoordinates(set, energy, test, iMC, 's');
             }
 
         }
@@ -171,6 +178,16 @@ int main (int argc, char* argv[]) {
     std::cout << "=ENERGIES/N=================================";
     std::cout << std::endl << std::endl;
     for ( auto e : energies ) { std::cout << "  " << e << std::endl;}
+    std::cout << std::endl;
+
+		std::cout << "=STATISTICS=================================";
+    std::cout << std::endl << std::endl;
+		std::cout << "  Metropolis succeses " << std::endl;
+		std::cout << "    " << ps/((double)N*ntest*nMC) << std::endl << std::endl;
+		std::cout << "  Metropolis failures " << std::endl;
+		std::cout << "    " << pf/((double)N*ntest*nMC) << std::endl << std::endl;
+    std::cout << std::endl;
+
 
     return 0;
 }

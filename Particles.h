@@ -115,11 +115,12 @@ void PrintCoordinates(Set_particles set, double energy, int test, int step, char
     output << "# Number of particles " << N << std::endl;
     output << "# Energy per particle " << energy/N << std::endl;
     output << "#==============================" << std::endl;
-    output << "# x\ty\tr" << std::endl;
+    output << "# x\ty\tr\talpha" << std::endl;
     output << std::setiosflags(std::ios::left);
     for( auto p : set ){
         output << std::setw(16) << p.x << std::setw(16) << p.y;
-        output << std::setw(16) << pow( pow(p.x,2) + pow(p.y,2) , 0.5) << std::endl;
+        output << std::setw(16) << pow( pow(p.x,2) + pow(p.y,2) , 0.5);
+        output << std::setw(16) << atan2(p.y,p.x) << std::endl;
     }
     output.close();
 }
