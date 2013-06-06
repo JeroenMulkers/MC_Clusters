@@ -1,0 +1,12 @@
+seed      13
+ntest     5
+N         8
+temp      0.
+nMC       1000
+step      1.
+factor    1.2
+max_step  2.
+min_step  0.001
+yukawa    0.
+verbose   0
+ini_coo   random
